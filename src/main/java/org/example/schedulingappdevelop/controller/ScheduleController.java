@@ -1,14 +1,19 @@
 package org.example.schedulingappdevelop.controller;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulingappdevelop.dto.CreateScheduleRequest;
 import org.example.schedulingappdevelop.dto.CreateScheduleResponse;
+import org.example.schedulingappdevelop.dto.GetScheduleResponse;
 import org.example.schedulingappdevelop.service.ScheduleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,6 +21,7 @@ public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
+    // Lv 1. 일정 생성 - Create
     @PostMapping("/schedules")
     public ResponseEntity<CreateScheduleResponse> createSchedule(
             @RequestBody CreateScheduleRequest request
@@ -24,4 +30,15 @@ public class ScheduleController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
+
+    // Lv 1. 일정 조회 - Read
+    // 다건 조회
+    @GetMapping("/schedules")
+    public ResponseEntity<List<GetScheduleResponse>> getSchedule() {
+
+        List<GetScheduleResponse> result = scheduleService.findAll();
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
 }
