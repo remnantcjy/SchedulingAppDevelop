@@ -1,9 +1,7 @@
 package org.example.schedulingappdevelop.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.dto.CreateScheduleRequest;
-import org.example.schedulingappdevelop.dto.CreateScheduleResponse;
-import org.example.schedulingappdevelop.dto.GetScheduleResponse;
+import org.example.schedulingappdevelop.dto.*;
 import org.example.schedulingappdevelop.entity.Schedule;
 import org.example.schedulingappdevelop.repository.ScheduleRepository;
 import org.springframework.stereotype.Service;
@@ -89,5 +87,30 @@ public class ScheduleService {
                 schedule.getModifiedAt()
         );
 
+    }
+
+    // Lv 1. 일정 수정 - Update
+    @Transactional
+    public UpdateScheduleResponse update(UpdateScheduleRequest request) {
+
+        // 해당 id의 일정이 있는지 확인
+        Long scheduleId = request.getId();
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new IllegalStateException("없는 일정입니다.")
+        );
+
+        // 일정 수정
+        schedule.update(request.getTitle(), request.getContents());
+
+        // 응답 객체로 변환 후 반환
+        return new UpdateScheduleResponse(
+                schedule.getId(),
+                schedule.getAuthor(),
+                schedule.getTitle(),
+                schedule.getContents(),
+                schedule.getCreatedAt(),
+                schedule.getModifiedAt()
+        );
     }
 }
