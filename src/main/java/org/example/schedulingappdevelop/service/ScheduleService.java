@@ -114,4 +114,20 @@ public class ScheduleService {
                 schedule.getModifiedAt()
         );
     }
+
+    // Lv 1. 일정 삭제 - Delete
+    @Transactional
+    public void delete(Long scheduleId) {
+        // 해당 id의 일정이 있는지 확인
+        boolean existence = scheduleRepository.existsById(scheduleId);
+
+        // 해당 id의 일정이 없으면 예외처리
+        if (!existence) {
+            throw new IllegalStateException("없는 일정입니다.");
+        } else {
+            // 있으면 삭제
+            scheduleRepository.deleteById(scheduleId);
+        }
+
+    }
 }
