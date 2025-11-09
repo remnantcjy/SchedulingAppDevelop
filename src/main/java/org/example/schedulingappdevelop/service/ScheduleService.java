@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.schedulingappdevelop.dto.*;
 import org.example.schedulingappdevelop.entity.Schedule;
 import org.example.schedulingappdevelop.repository.ScheduleRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +47,8 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public List<GetScheduleResponse> findAll() {
 
-        // 레포지토리에서 모든 일정을 찾아서 일정리스트로 반환
-        List<Schedule> scheduleList = scheduleRepository.findAll();
+        // 레포지토리에서 모든 일정을 찾아서 일정리스트로 반환 - 수정일 기준 내림차순
+        List<Schedule> scheduleList = scheduleRepository.findAll(Sort.by(Sort.Direction.DESC, "modifiedAt"));
 
         // 응답 객체로 만들어주기 위한 dtos 리스트 생성
         List<GetScheduleResponse> dtos = new ArrayList<>();
