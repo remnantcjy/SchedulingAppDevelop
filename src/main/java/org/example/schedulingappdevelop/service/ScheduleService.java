@@ -70,4 +70,24 @@ public class ScheduleService {
 
         return dtos;
     }
+
+    // 단건 조회
+    @Transactional(readOnly = true)
+    public GetScheduleResponse getOne(Long id) {
+
+        // id에 해당하는 일정이 있는지 확인 / 예외처리
+        Schedule schedule = scheduleRepository.findById(id).orElseThrow(
+                () -> new IllegalStateException("없는 일정입니다.")
+        );
+
+        return new GetScheduleResponse(
+                schedule.getId(),
+                schedule.getAuthor(),
+                schedule.getTitle(),
+                schedule.getContents(),
+                schedule.getCreatedAt(),
+                schedule.getModifiedAt()
+        );
+
+    }
 }

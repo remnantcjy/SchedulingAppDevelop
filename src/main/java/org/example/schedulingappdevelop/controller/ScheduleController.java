@@ -8,10 +8,7 @@ import org.example.schedulingappdevelop.dto.GetScheduleResponse;
 import org.example.schedulingappdevelop.service.ScheduleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,6 +34,15 @@ public class ScheduleController {
     public ResponseEntity<List<GetScheduleResponse>> getSchedule() {
 
         List<GetScheduleResponse> result = scheduleService.findAll();
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    // 단건 조회
+    @GetMapping("/schedules/{id}")
+    public ResponseEntity<GetScheduleResponse> getOneSchedule(@PathVariable Long id)
+    {
+        GetScheduleResponse result = scheduleService.getOne(id);
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
