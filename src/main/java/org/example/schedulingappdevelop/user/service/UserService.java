@@ -78,4 +78,18 @@ public class UserService {
         // 수정된 유저 반환
         return new UpdateUserResponse(user.getId());
     }
+
+    @Transactional
+    public void delete(Long userId) {
+        // 해당 id의 유저 있는지 확인
+        boolean existence = userRepository.existsById(userId);
+
+        // 없으면 예외 던지기
+        if (!existence) {
+            throw new IllegalStateException("없는 유저입니다.");
+        }
+
+        // 있으면 해당 id로 유저 삭제하기
+        userRepository.deleteById(userId);
+    }
 }
