@@ -1,9 +1,9 @@
-package org.example.schedulingappdevelop.service;
+package org.example.schedulingappdevelop.schedule.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.dto.*;
-import org.example.schedulingappdevelop.entity.Schedule;
-import org.example.schedulingappdevelop.repository.ScheduleRepository;
+import org.example.schedulingappdevelop.schedule.dto.*;
+import org.example.schedulingappdevelop.schedule.entity.Schedule;
+import org.example.schedulingappdevelop.schedule.repository.ScheduleRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
