@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.entity.User;
 import org.example.schedulingappdevelop.user.repository.UserRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,14 +30,16 @@ public class UserService {
         return new CreateUserResponse(
                 savedUser.getId(),
                 savedUser.getName(),
-                savedUser.getEmail()
+                savedUser.getEmail(),
+                savedUser.getCreatedAt(),
+                savedUser.getModifiedAt()
         );
     }
 
     @Transactional(readOnly = true)
     public List<GetUserResponse> getAll() {
-        // 유저 저장소에 있는 모든 유저 - 리스트로 반환
-        List<User> userList = userRepository.findAll();
+        // 유저 저장소에 있는 모든 유저 - 리스트로 반환 (수정일 기준으로 내림차순 정렬)
+        List<User> userList = userRepository.findAll(Sort.by(Sort.Direction.DESC, "modifiedAt"));
 
         // 반환 dtos 리스트 생성
         List<GetUserResponse> dtos = new ArrayList<>();
@@ -44,9 +47,11 @@ public class UserService {
         // 리스트 데이터타입: User -> GetUserResponse로 변환 후 반환
         return userList.stream().map(
                 user -> new GetUserResponse(
-                    user.getId(),
-                    user.getName(),
-                    user.getEmail()
+                        user.getId(),
+                        user.getName(),
+                        user.getEmail(),
+                        user.getCreatedAt(),
+                        user.getModifiedAt()
                 )).toList();
     }
 
@@ -61,7 +66,9 @@ public class UserService {
         return new GetUserResponse(
                 user.getId(),
                 user.getName(),
-                user.getEmail()
+                user.getEmail(),
+                user.getCreatedAt(),
+                user.getModifiedAt()
         );
     }
 
@@ -76,7 +83,13 @@ public class UserService {
         user.update(request.getName());
 
         // 수정된 유저 반환
-        return new UpdateUserResponse(user.getId());
+        return new UpdateUserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getCreatedAt(),
+                user.getModifiedAt()
+        );
     }
 
     @Transactional
