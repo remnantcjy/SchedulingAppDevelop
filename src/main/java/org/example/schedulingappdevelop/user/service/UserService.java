@@ -36,7 +36,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetUserResponse> findAll() {
+    public List<GetUserResponse> getAll() {
         // 유저 저장소에 있는 모든 유저 - 리스트로 반환
         List<User> userList = userRepository.findAll();
 
@@ -50,5 +50,20 @@ public class UserService {
                     user.getName(),
                     user.getEmail()
                 )).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public GetUserResponse getOne(Long userId) {
+        // 해당 userId의 유저 있는지 조회 / 예외처리
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalStateException("없는 유저입니다.")
+        );
+
+        // 해당 user 반환
+        return new GetUserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail()
+        );
     }
 }

@@ -7,10 +7,7 @@ import org.example.schedulingappdevelop.user.dto.GetUserResponse;
 import org.example.schedulingappdevelop.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,6 +28,14 @@ public class UserController {
     // 유저 조회 - 다건
     @GetMapping("/users")
     public ResponseEntity<List<GetUserResponse>> getAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.findAll());
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getAll());
+    }
+
+    // 유저 조회 - 단건
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<GetUserResponse> getOne(
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getOne(userId));
     }
 }
