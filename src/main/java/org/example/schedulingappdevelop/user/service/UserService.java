@@ -2,9 +2,7 @@ package org.example.schedulingappdevelop.user.service;
 
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.user.dto.CreateUserRequest;
-import org.example.schedulingappdevelop.user.dto.CreateUserResponse;
-import org.example.schedulingappdevelop.user.dto.GetUserResponse;
+import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.entity.User;
 import org.example.schedulingappdevelop.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -65,5 +63,19 @@ public class UserService {
                 user.getName(),
                 user.getEmail()
         );
+    }
+
+    @Transactional
+    public UpdateUserResponse update(UpdateUserRequest request) {
+        // 해당 id의 유저가 있는지 확인 / 예외처리
+        User user = userRepository.findById(request.getId()).orElseThrow(
+                () -> new IllegalStateException("없는 유저입니다.")
+        );
+
+        // 유저의 이름을 변경
+        user.update(request.getName());
+
+        // 수정된 유저 반환
+        return new UpdateUserResponse(user.getId());
     }
 }

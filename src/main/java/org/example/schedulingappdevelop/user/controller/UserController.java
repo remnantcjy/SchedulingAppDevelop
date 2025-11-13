@@ -1,9 +1,7 @@
 package org.example.schedulingappdevelop.user.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.user.dto.CreateUserRequest;
-import org.example.schedulingappdevelop.user.dto.CreateUserResponse;
-import org.example.schedulingappdevelop.user.dto.GetUserResponse;
+import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +35,13 @@ public class UserController {
             @PathVariable Long userId
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getOne(userId));
+    }
+
+    // 유저 수정
+    @PutMapping("/users")
+    public ResponseEntity<UpdateUserResponse> update(
+            @RequestBody UpdateUserRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.update(request));
     }
 }
