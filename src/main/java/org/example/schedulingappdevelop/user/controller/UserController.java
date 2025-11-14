@@ -15,12 +15,12 @@ public class UserController {
 
     private final UserService userService;
 
-    // 유저 생성
-    @PostMapping("/users")
-    public ResponseEntity<CreateUserResponse> create(
-            @RequestBody CreateUserRequest request
+    // 회원가입
+    @PostMapping("/signup")
+    public ResponseEntity<SignupUserResponse> signup(
+            @RequestBody SignupUserRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.signup(request));
     }
 
     // 유저 조회 - 다건

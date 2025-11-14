@@ -1,6 +1,5 @@
 package org.example.schedulingappdevelop.user.service;
 
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.entity.User;
@@ -19,7 +18,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public CreateUserResponse save(CreateUserRequest request) {
+    public SignupUserResponse signup(SignupUserRequest request) {
         // 유저 객체 생성
         User user = new User(request.getName(), request.getEmail());
 
@@ -27,7 +26,7 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         // 반환
-        return new CreateUserResponse(
+        return new SignupUserResponse(
                 savedUser.getId(),
                 savedUser.getName(),
                 savedUser.getEmail(),
