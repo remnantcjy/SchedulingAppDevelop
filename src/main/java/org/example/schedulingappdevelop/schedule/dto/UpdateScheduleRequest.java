@@ -11,7 +11,10 @@ public class UpdateScheduleRequest {
 
     @NotBlank @Size(max = 10, message = "제목은 {max}자 이내로 작성해주세요.")
     private String title;
-    
+
     @NotBlank
     private String contents;
+
+    @NotBlank
+    private String password;
 }

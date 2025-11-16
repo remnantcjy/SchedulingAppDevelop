@@ -10,4 +10,7 @@ public class UpdateUserRequest {
     // 이름만 변경
     @NotBlank @Size(max = 4, message = "이름은 {max}자 이하이어야 합니다.")
     private String name;
+
+    @NotBlank
+    private String password;
 }

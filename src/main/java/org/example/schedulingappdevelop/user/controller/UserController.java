@@ -3,6 +3,7 @@ package org.example.schedulingappdevelop.user.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.schedulingappdevelop.config.SessionExpiredException;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -68,12 +69,20 @@ public class UserController {
     @PutMapping("/users/{userId}")
     public ResponseEntity<UpdateUserResponse> update(
             @PathVariable Long userId,
-            @Valid @RequestBody UpdateUserRequest request
+            @Valid @RequestBody UpdateUserRequest request,
+            HttpSession session
     ) {
+
+        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
+
+        if (loginUser == null) {
+            throw new SessionExpiredException("회원정보를 수정하려면 로그인이 필요합니다.");
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));
     }
 
-    // 유저 삭제
+    // 유저 삭제 - 회원 탈퇴
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long userId

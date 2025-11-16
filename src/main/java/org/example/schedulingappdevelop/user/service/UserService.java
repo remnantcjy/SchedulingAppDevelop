@@ -50,7 +50,7 @@ public class UserService {
 
         // 비밀번호 확인
         if (!request.getPassword().equals(user.getPassword())) {
-            throw new PasswordMismatchException("비밀번호가 틀렸습니다.");
+            throw new PasswordMismatchException("이메일 또는 비밀번호가 올바르지 않습니다.");
         } else {
             System.out.println("로그인 성공!");
         }
@@ -105,6 +105,12 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalStateException("없는 유저입니다.")
         );
+
+        // user의 비밀번호 불일치 시 - 이름 수정 x
+        // 비밀번호 불일치 예외 사용 !
+        if (!user.getPassword().equals(request.getPassword())) {
+            throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 회원정보를 수정할 수 없습니다.");
+        }
 
         // 유저의 이름을 변경
         user.update(request.getName());

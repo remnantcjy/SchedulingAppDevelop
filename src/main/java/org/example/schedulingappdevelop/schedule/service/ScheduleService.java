@@ -1,9 +1,12 @@
 package org.example.schedulingappdevelop.schedule.service;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.example.schedulingappdevelop.config.PasswordMismatchException;
 import org.example.schedulingappdevelop.schedule.dto.*;
 import org.example.schedulingappdevelop.schedule.entity.Schedule;
 import org.example.schedulingappdevelop.schedule.repository.ScheduleRepository;
+import org.example.schedulingappdevelop.user.dto.SessionUser;
 import org.example.schedulingappdevelop.user.entity.User;
 import org.example.schedulingappdevelop.user.repository.UserRepository;
 import org.springframework.data.domain.Sort;
@@ -113,12 +116,17 @@ public class ScheduleService {
 
     // Lv 1. 일정 수정 - Update
     @Transactional
-    public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request) {
+    public UpdateScheduleResponse update(SessionUser loginUser, Long scheduleId, UpdateScheduleRequest request) {
 
         // 해당 id의 일정이 있는지 확인
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("없는 일정입니다.")
         );
+
+        // 세션, request의 비밀번호 일치하는지 조회
+        if (!loginUser.getPassword().equals(request.getPassword())) {
+            throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 일정을 수정할 수 없습니다.");
+        }
 
         // 일정 수정
         schedule.update(request.getTitle(), request.getContents());
@@ -138,7 +146,7 @@ public class ScheduleService {
 
     // Lv 1. 일정 삭제 - Delete
     @Transactional
-    public void delete(Long scheduleId) {
+    public void delete(Long scheduleId, DeleteScheduleRequest request) {
         // 해당 id의 일정이 있는지 확인
         boolean existence = scheduleRepository.existsById(scheduleId);
 
@@ -146,7 +154,18 @@ public class ScheduleService {
         if (!existence) {
             throw new IllegalStateException("없는 일정입니다.");
         } else {
-            // 있으면 삭제
+            // 해당 id의 일정이 있을 때
+            // 비밀번호 확인
+            Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                    () -> new IllegalStateException("ad")
+            );
+
+            // 비밀번호 불일치 시
+            if (!schedule.getUser().getPassword().equals(request.getPassword())) {
+                throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 일정을 삭제할 수 없습니다.");
+            }
+
+            // 비밀번호 일치 시, 해당 일정 삭제
             scheduleRepository.deleteById(scheduleId);
         }
     }

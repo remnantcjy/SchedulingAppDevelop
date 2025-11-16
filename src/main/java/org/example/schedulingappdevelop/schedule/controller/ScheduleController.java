@@ -1,9 +1,13 @@
 package org.example.schedulingappdevelop.schedule.controller;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.schedulingappdevelop.config.PasswordMismatchException;
+import org.example.schedulingappdevelop.config.SessionExpiredException;
 import org.example.schedulingappdevelop.schedule.dto.*;
 import org.example.schedulingappdevelop.schedule.service.ScheduleService;
+import org.example.schedulingappdevelop.user.dto.SessionUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,19 +45,37 @@ public class ScheduleController {
     @PutMapping("/schedules/{scheduleId}")
     public ResponseEntity<UpdateScheduleResponse> updateSchedule(
             @PathVariable Long scheduleId,
-            @Valid @RequestBody UpdateScheduleRequest request
+            @Valid @RequestBody UpdateScheduleRequest request,
+            HttpSession session
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(scheduleId, request));
+
+        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
+
+        // 세션 만료 확인
+        if (loginUser == null) {
+            throw new SessionExpiredException("일정을 수정하기 위해 로그인이 필요합니다.");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(loginUser, scheduleId, request));
     }
 
 
     // Lv 1. 일정 삭제 - Delete
     @DeleteMapping("/schedules/{scheduleId}")
     public ResponseEntity<Void> deleteSchedule(
-            @PathVariable Long scheduleId
+            @PathVariable Long scheduleId,
+            @RequestBody DeleteScheduleRequest request,
+            HttpSession session
     ) {
 
-        scheduleService.delete(scheduleId);
+        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
+
+        // 세션 만료 확인
+        if (loginUser == null) {
+            throw new SessionExpiredException("일정을 삭제하기 위해 로그인이 필요합니다.");
+        }
+
+        scheduleService.delete(scheduleId, request);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

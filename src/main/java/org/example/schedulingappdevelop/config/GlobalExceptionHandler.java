@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // PasswordMismatchException 커스텀 에러 핸들링
+    // 커스텀 에러 핸들링
     @ExceptionHandler(ServerException.class)
     public ResponseEntity<ErrorResponse> handlePasswordMismatchException(ServerException ex) {
         ErrorResponse response = new ErrorResponse(ex.getMessage());
@@ -17,4 +17,5 @@ public class GlobalExceptionHandler {
                 .status(ex.getStatus())     // 커스텀 에러마다 동적인 에러 코드 설정 가능 !
                 .body(response);
     }
+
 }
