@@ -22,9 +22,9 @@ public class ScheduleService {
 
     // Lv1. 일정 생성 - Create
     @Transactional
-    public CreateScheduleResponse save(CreateScheduleRequest request) {
+    public CreateScheduleResponse save(Long userId, CreateScheduleRequest request) {
         // 해당 이름의 유저 있는지 확인 / 예외처리
-        User user = userRepository.findById(request.getUserId()).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalStateException("없는 유저입니다.")
         );
 
@@ -113,10 +113,10 @@ public class ScheduleService {
 
     // Lv 1. 일정 수정 - Update
     @Transactional
-    public UpdateScheduleResponse update(UpdateScheduleRequest request) {
+    public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request) {
 
         // 해당 id의 일정이 있는지 확인
-        Schedule schedule = scheduleRepository.findById(request.getScheduleId()).orElseThrow(
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("없는 일정입니다.")
         );
 

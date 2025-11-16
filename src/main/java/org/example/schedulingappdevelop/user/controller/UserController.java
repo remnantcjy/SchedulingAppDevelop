@@ -1,11 +1,13 @@
 package org.example.schedulingappdevelop.user.controller;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,14 +21,14 @@ public class UserController {
     // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<SignupUserResponse> signup(
-            @RequestBody SignupUserRequest request
+            @Valid @RequestBody SignupUserRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.signup(request));
     }
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpSession session) {
+    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request, HttpSession session) {
 
         // SessionUser = 세션 저장용 DTO
         SessionUser sessionUser = userService.login(request);
@@ -63,11 +65,12 @@ public class UserController {
     }
 
     // 유저 수정
-    @PutMapping("/users")
+    @PutMapping("/users/{userId}")
     public ResponseEntity<UpdateUserResponse> update(
-            @RequestBody UpdateUserRequest request
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateUserRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.update(request));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));
     }
 
     // 유저 삭제

@@ -1,5 +1,6 @@
 package org.example.schedulingappdevelop.schedule.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulingappdevelop.schedule.dto.*;
 import org.example.schedulingappdevelop.schedule.service.ScheduleService;
@@ -16,11 +17,12 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     // Lv 1. 일정 생성 - Create
-    @PostMapping("/schedules")
+    @PostMapping("/schedules/{userId}")
     public ResponseEntity<CreateScheduleResponse> createSchedule(
-            @RequestBody CreateScheduleRequest request
+            @PathVariable Long userId,
+            @Valid @RequestBody CreateScheduleRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(userId, request));
     }
 
 
@@ -36,11 +38,12 @@ public class ScheduleController {
 
 
     // Lv 1. 일정 수정 - Update
-    @PutMapping("/schedules")
+    @PutMapping("/schedules/{scheduleId}")
     public ResponseEntity<UpdateScheduleResponse> updateSchedule(
-            @RequestBody UpdateScheduleRequest request
+            @PathVariable Long scheduleId,
+            @Valid @RequestBody UpdateScheduleRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(request));
+        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(scheduleId, request));
     }
 
 

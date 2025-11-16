@@ -100,9 +100,9 @@ public class UserService {
     }
 
     @Transactional
-    public UpdateUserResponse update(UpdateUserRequest request) {
+    public UpdateUserResponse update(Long userId, UpdateUserRequest request) {
         // 해당 id의 유저가 있는지 확인 / 예외처리
-        User user = userRepository.findById(request.getId()).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalStateException("없는 유저입니다.")
         );
 
