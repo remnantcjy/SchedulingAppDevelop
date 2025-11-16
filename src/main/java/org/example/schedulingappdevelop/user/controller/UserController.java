@@ -1,5 +1,6 @@
 package org.example.schedulingappdevelop.user.controller;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.service.UserService;
@@ -21,6 +22,30 @@ public class UserController {
             @RequestBody SignupUserRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.signup(request));
+    }
+
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpSession session) {
+
+        // SessionUser = 세션 저장용 DTO
+        SessionUser sessionUser = userService.login(request);
+
+        // 로그인 상태를 만드는 핵심 로직
+        session.setAttribute("loginUser", sessionUser);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser, HttpSession session) {
+        if (sessionUser == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        session.invalidate();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     // 유저 조회 - 다건

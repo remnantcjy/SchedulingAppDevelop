@@ -17,10 +17,12 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    // 회원가입
     @Transactional
     public SignupUserResponse signup(SignupUserRequest request) {
+
         // 유저 객체 생성
-        User user = new User(request.getName(), request.getEmail());
+        User user = new User(request.getName(), request.getEmail(), request.getPassword());
 
         // 유저 객체 저장소에 저장
         User savedUser = userRepository.save(user);
@@ -32,6 +34,31 @@ public class UserService {
                 savedUser.getEmail(),
                 savedUser.getCreatedAt(),
                 savedUser.getModifiedAt()
+        );
+    }
+
+
+    // 로그인
+    @Transactional(readOnly = true)
+    public SessionUser login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(
+                () -> new IllegalStateException("없는 유저입니다.")
+        );
+
+
+        // 비밀번호 확인
+        if (!request.getPassword().equals(user.getPassword())) {
+            throw new IllegalStateException("비밀번호가 틀렸습니다.");
+        } else {
+            System.out.println("로그인 성공!");
+        }
+
+        return new SessionUser(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPassword()
         );
     }
 
@@ -104,4 +131,6 @@ public class UserService {
         // 있으면 해당 id로 유저 삭제하기
         userRepository.deleteById(userId);
     }
+
+
 }
