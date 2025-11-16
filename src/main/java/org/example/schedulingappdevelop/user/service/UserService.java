@@ -1,6 +1,7 @@
 package org.example.schedulingappdevelop.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.schedulingappdevelop.config.PasswordMismatchException;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.entity.User;
 import org.example.schedulingappdevelop.user.repository.UserRepository;
@@ -49,7 +50,7 @@ public class UserService {
 
         // 비밀번호 확인
         if (!request.getPassword().equals(user.getPassword())) {
-            throw new IllegalStateException("비밀번호가 틀렸습니다.");
+            throw new PasswordMismatchException("비밀번호가 틀렸습니다.");
         } else {
             System.out.println("로그인 성공!");
         }
