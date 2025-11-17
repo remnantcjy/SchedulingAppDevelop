@@ -8,12 +8,12 @@ import org.example.schedulingappdevelop.comment.dto.CreateCommentRequest;
 import org.example.schedulingappdevelop.comment.service.CommentService;
 import org.example.schedulingappdevelop.common.config.Exception.LoginRequiredException;
 import org.example.schedulingappdevelop.user.dto.SessionUser;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,5 +36,21 @@ public class CommentController {
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(commentService.save(scheduleId, request));
+    }
+
+    // 댓글 조회
+    // 단건 조회
+    @GetMapping("/schedules/{scheduleId}/comments")
+    public ResponseEntity<List<CommentResponse>> getComment(
+            @PathVariable Long scheduleId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.getOne(scheduleId));
+    }
+
+    // 다건 조회
+    @GetMapping("/comments")
+    public ResponseEntity<List<CommentResponse>> getComment(
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.getAll());
     }
 }
