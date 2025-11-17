@@ -1,6 +1,7 @@
 package org.example.schedulingappdevelop.comment.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,5 +32,9 @@ public class Comment extends BaseEntity {
         this.comment = comment;
         this.user = user;
         this.schedule = schedule;
+    }
+
+    public void update(@NotBlank String comment) {
+        this.comment = comment;
     }
 }

@@ -3,8 +3,10 @@ package org.example.schedulingappdevelop.comment.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.example.schedulingappdevelop.comment.dto.CommentResponse;
 import org.example.schedulingappdevelop.comment.dto.CreateCommentRequest;
+import org.example.schedulingappdevelop.comment.dto.UpdateCommentRequest;
 import org.example.schedulingappdevelop.comment.service.CommentService;
 import org.example.schedulingappdevelop.common.config.Exception.LoginRequiredException;
 import org.example.schedulingappdevelop.user.dto.SessionUser;
@@ -52,5 +54,23 @@ public class CommentController {
     public ResponseEntity<List<CommentResponse>> getComment(
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.getAll());
+    }
+
+    // 댓글 수정
+    @PutMapping("/schedules/{scheduleId}/comments/{commentId}")
+    public ResponseEntity<CommentResponse> updateComment(
+            @PathVariable Long scheduleId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody UpdateCommentRequest request,
+            HttpSession session
+    ) {
+        // 로그인 시 수정 가능
+        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
+
+        if (loginUser == null) {
+            throw new LoginRequiredException("댓글을 수정하기 위해 로그인이 필요합니다.");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.update(loginUser, scheduleId, commentId, request));
     }
 }

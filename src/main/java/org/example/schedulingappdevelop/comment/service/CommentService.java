@@ -1,13 +1,18 @@
 package org.example.schedulingappdevelop.comment.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulingappdevelop.comment.dto.CommentResponse;
 import org.example.schedulingappdevelop.comment.dto.CreateCommentRequest;
+import org.example.schedulingappdevelop.comment.dto.UpdateCommentRequest;
 import org.example.schedulingappdevelop.comment.entity.Comment;
 import org.example.schedulingappdevelop.comment.repository.CommentRepository;
+import org.example.schedulingappdevelop.common.config.Exception.PasswordMismatchException;
 import org.example.schedulingappdevelop.common.config.Exception.ScheduleNotFoundException;
+import org.example.schedulingappdevelop.common.config.auth.PasswordEncoder;
 import org.example.schedulingappdevelop.schedule.entity.Schedule;
 import org.example.schedulingappdevelop.schedule.repository.ScheduleRepository;
+import org.example.schedulingappdevelop.user.dto.SessionUser;
 import org.example.schedulingappdevelop.user.entity.User;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -23,6 +28,7 @@ public class CommentService {
 
     private final ScheduleRepository scheduleRepository;
     private final CommentRepository commentRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 댓글 생성
@@ -119,5 +125,53 @@ public class CommentService {
             dtos.add(dto);
         }
         return dtos;
+    }
+
+
+    /**
+     * 댓글 수정
+     * @param loginUser
+     * @param scheduleId
+     * @param commentId
+     * @param request
+     * @return
+     */
+    public CommentResponse update(SessionUser loginUser, Long scheduleId, Long commentId, @Valid UpdateCommentRequest request) {
+        // 해당 일정이 있는지 확인
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new ScheduleNotFoundException("해당 일정이 없습니다.")
+        );
+
+        // 해당 댓글이 있는지 확인
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new IllegalStateException("해당 댓글이 없습니다.")
+        );
+
+        // 비밀번호 검증
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), schedule.getUser().getPassword());
+
+        // 비밀번호 불일치 시, 예외 처리
+        if (!passwordMatches) {
+            throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 댓글을 수정할 수 없습니다.");
+        }
+
+        // 댓글 수정
+        comment.update(request.getComment());
+
+        // 변경된 댓글 저장
+        Comment savedComment = commentRepository.save(comment);
+
+        // 반환
+        return new CommentResponse(
+                savedComment.getUser().getId(),
+                savedComment.getUser().getName(),
+                savedComment.getSchedule().getId(),
+                savedComment.getSchedule().getTitle(),
+                savedComment.getSchedule().getContents(),
+                savedComment.getId(),
+                savedComment.getComment(),
+                savedComment.getCreatedAt(),
+                savedComment.getModifiedAt()
+        );
     }
 }
