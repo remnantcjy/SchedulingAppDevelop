@@ -20,7 +20,7 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     // Lv 1. 일정 생성 - Create
-    @PostMapping("/schedules/{userId}")
+    @PostMapping("/users/{userId}/schedules")
     public ResponseEntity<CreateScheduleResponse> createSchedule(
             @PathVariable Long userId,
             @Valid @RequestBody CreateScheduleRequest request,

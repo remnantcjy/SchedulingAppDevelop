@@ -47,9 +47,9 @@ public class ScheduleService {
 
         // 저장된 데이터 - 응답 DTO로 반환
         return new CreateScheduleResponse(
-                savedSchedule.getId(),
                 user.getId(),
                 user.getName(),
+                savedSchedule.getId(),
                 savedSchedule.getTitle(),
                 savedSchedule.getContents(),
                 savedSchedule.getCreatedAt(),
@@ -78,9 +78,9 @@ public class ScheduleService {
 
             for (Schedule schedule : scheduleList) {
                 GetScheduleResponse dto = new GetScheduleResponse(
-                        schedule.getId(),
                         schedule.getUser().getId(),
                         schedule.getUser().getName(),
+                        schedule.getId(),
                         schedule.getTitle(),
                         schedule.getContents(),
                         schedule.getCreatedAt(),
@@ -103,9 +103,9 @@ public class ScheduleService {
         // 응답 객체 변환 후, dtos 리스트에 추가
         for (Schedule schedule : scheduleList) {
             GetScheduleResponse dto = new GetScheduleResponse(
-                    schedule.getId(),
                     schedule.getUser().getId(),
                     schedule.getUser().getName(),
+                    schedule.getId(),
                     schedule.getTitle(),
                     schedule.getContents(),
                     schedule.getCreatedAt(),
@@ -139,9 +139,9 @@ public class ScheduleService {
 
         // 응답 객체로 변환 후 반환
         return new UpdateScheduleResponse(
-                schedule.getId(),
                 schedule.getUser().getId(),
                 schedule.getUser().getName(),
+                schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContents(),
                 schedule.getCreatedAt(),

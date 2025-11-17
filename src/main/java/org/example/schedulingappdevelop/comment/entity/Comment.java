@@ -17,7 +17,7 @@ public class Comment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;            // 댓글 id
 
-    private String contents;    // 댓글
+    private String comment;    // 댓글
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -27,8 +27,8 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
 
-    public Comment(String contents, User user, Schedule schedule) {
-        this.contents = contents;
+    public Comment(String comment, User user, Schedule schedule) {
+        this.comment = comment;
         this.user = user;
         this.schedule = schedule;
     }
