@@ -153,28 +153,21 @@ public class ScheduleService {
     // Lv 1. 일정 삭제 - Delete
     @Transactional
     public void delete(Long scheduleId, DeleteScheduleRequest request) {
+
         // 해당 id의 일정이 있는지 확인
-        boolean existence = scheduleRepository.existsById(scheduleId);
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new ScheduleNotFoundException("없는 일정입니다.")
+        );
 
-        // 해당 id의 일정이 없으면 예외처리
-        if (!existence) {
-            throw new ScheduleNotFoundException("없는 일정입니다.");
-        } else {
-            // 해당 id의 일정이 있을 때
-            // 비밀번호 확인
-            Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                    () -> new ScheduleNotFoundException("없는 일정입니다.")
-            );
+        // 비밀번호 확인
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), schedule.getUser().getPassword());
 
-            boolean passwordMatches = passwordEncoder.matches(request.getPassword(), schedule.getUser().getPassword());
-
-            // 비밀번호 불일치 시
-            if (!passwordMatches) {
-                throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 일정을 삭제할 수 없습니다.");
-            }
-
-            // 비밀번호 일치 시, 해당 일정 삭제
-            scheduleRepository.deleteById(scheduleId);
+        // 비밀번호 불일치 시
+        if (!passwordMatches) {
+            throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 일정을 삭제할 수 없습니다.");
         }
+
+        // 비밀번호 일치 시, 해당 일정 삭제
+        scheduleRepository.deleteById(scheduleId);
     }
 }

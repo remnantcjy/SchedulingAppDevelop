@@ -142,38 +142,30 @@ public class UserService {
 
     @Transactional
     public void delete(DeleteUserRequest request, Long userId) {
+
         // 해당 id의 유저 있는지 확인
-        boolean existence = userRepository.existsById(userId);
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException("없는 유저입니다.")
+        );
 
-        // 없으면 예외 던지기
-        if (!existence) {
-            throw new UserNotFoundException("없는 유저입니다.");
-        } else {
-            // 있으면 비밀번호 확인
+        // 유저 있을 때 -> 비밀번호 확인
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-            User user = userRepository.findById(userId).orElseThrow(
-                    () -> new UserNotFoundException("없는 유저입니다.")
-            );
-
-            boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
-
-            if (!passwordMatches) {
-                throw new PasswordMismatchException("비밀번호가 일치하지 않아 회원 탈퇴가 불가능합니다.");
-            }
+        // 비밀번호 불일치 시, 예외 처리
+        if (!passwordMatches) {
+            throw new PasswordMismatchException("비밀번호가 일치하지 않아 회원 탈퇴가 불가능합니다.");
         }
 
-        // 있으면 해당 유저의 게시글이 있는지 확인
+        // 비밀번호 일치 시, 해당 유저 - 게시글이 있는지 확인
         List<Schedule> scheduleList = scheduleRepository.findByUserId(userId);
 
+        // 게시글이 존재할 시, 예외 처리
         if (!scheduleList.isEmpty()) {
             throw new UserHasScheduleException("해당 유저가 작성한 게시글이 남아 있어 삭제할 수 없습니다. 게시글을 모두 삭제한 후 다시 시도해주세요.");
         } else {
-            // 있으면 해당 id로 유저 삭제하기
+            // 게시글이 없을 시, 해당 유저 삭제
             userRepository.deleteById(userId);
-
         }
-
     }
-
 
 }
