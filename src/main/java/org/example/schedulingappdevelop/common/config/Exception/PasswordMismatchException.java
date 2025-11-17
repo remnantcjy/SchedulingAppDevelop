@@ -1,5 +1,6 @@
-package org.example.schedulingappdevelop.config;
+package org.example.schedulingappdevelop.common.config.Exception;
 
+import org.example.schedulingappdevelop.common.config.ServerException;
 import org.springframework.http.HttpStatus;
 
 // 이메일 - 비밀번호 불일치 예외처리

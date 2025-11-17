@@ -1,4 +1,4 @@
-package org.example.schedulingappdevelop.config;
+package org.example.schedulingappdevelop.common.config.auth;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;

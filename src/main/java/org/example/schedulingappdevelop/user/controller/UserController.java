@@ -3,7 +3,7 @@ package org.example.schedulingappdevelop.user.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.config.LoginRequiredException;
+import org.example.schedulingappdevelop.common.config.Exception.LoginRequiredException;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -84,9 +84,10 @@ public class UserController {
     // 유저 삭제 - 회원 탈퇴
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<Void> delete(
-            @PathVariable Long userId
+            @PathVariable Long userId,
+            @RequestBody DeleteUserRequest request
     ) {
-        userService.delete(userId);
+        userService.delete(request, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

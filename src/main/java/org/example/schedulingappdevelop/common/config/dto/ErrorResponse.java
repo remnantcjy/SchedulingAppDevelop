@@ -1,4 +1,4 @@
-package org.example.schedulingappdevelop.config.dto;
+package org.example.schedulingappdevelop.common.config.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

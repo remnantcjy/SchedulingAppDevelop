@@ -1,9 +1,10 @@
 package org.example.schedulingappdevelop.schedule.service;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.config.PasswordEncoder;
-import org.example.schedulingappdevelop.config.PasswordMismatchException;
+import org.example.schedulingappdevelop.common.config.Exception.ScheduleNotFoundException;
+import org.example.schedulingappdevelop.common.config.Exception.UserNotFoundException;
+import org.example.schedulingappdevelop.common.config.auth.PasswordEncoder;
+import org.example.schedulingappdevelop.common.config.Exception.PasswordMismatchException;
 import org.example.schedulingappdevelop.schedule.dto.*;
 import org.example.schedulingappdevelop.schedule.entity.Schedule;
 import org.example.schedulingappdevelop.schedule.repository.ScheduleRepository;
@@ -31,7 +32,7 @@ public class ScheduleService {
     public CreateScheduleResponse save(Long userId, CreateScheduleRequest request) {
         // 해당 이름의 유저 있는지 확인 / 예외처리
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalStateException("없는 유저입니다.")
+                () -> new UserNotFoundException("없는 유저입니다.")
         );
 
         // request에서 값 꺼내와 일정 객체로 변환
@@ -68,7 +69,7 @@ public class ScheduleService {
 
             // 해당 id의 일정리스트만 반환
             User user = userRepository.findById(userId).orElseThrow(
-                    () -> new IllegalStateException("없는 유저입니다.")
+                    () -> new UserNotFoundException("없는 유저입니다.")
             );
 
             // 수정일 기준 내림차순 정렬
@@ -123,7 +124,7 @@ public class ScheduleService {
 
         // 해당 id의 일정이 있는지 확인
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new IllegalStateException("없는 일정입니다.")
+                () -> new ScheduleNotFoundException("없는 일정입니다.")
         );
 
         boolean passwordMatches = passwordEncoder.matches(request.getPassword(), loginUser.getPassword());
@@ -157,12 +158,12 @@ public class ScheduleService {
 
         // 해당 id의 일정이 없으면 예외처리
         if (!existence) {
-            throw new IllegalStateException("없는 일정입니다.");
+            throw new ScheduleNotFoundException("없는 일정입니다.");
         } else {
             // 해당 id의 일정이 있을 때
             // 비밀번호 확인
             Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                    () -> new IllegalStateException("없는 일정입니다.")
+                    () -> new ScheduleNotFoundException("없는 일정입니다.")
             );
 
             boolean passwordMatches = passwordEncoder.matches(request.getPassword(), schedule.getUser().getPassword());

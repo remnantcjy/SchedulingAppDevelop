@@ -1,4 +1,4 @@
-package org.example.schedulingappdevelop.config;
+package org.example.schedulingappdevelop.common.config;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

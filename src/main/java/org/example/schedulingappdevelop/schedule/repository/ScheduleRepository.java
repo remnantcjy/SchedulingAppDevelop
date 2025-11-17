@@ -14,4 +14,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     List<Schedule> findByUserIdOrderByModifiedAtDesc(Long userId);
 
+    List<Schedule> findByUserId(Long userId);
 }

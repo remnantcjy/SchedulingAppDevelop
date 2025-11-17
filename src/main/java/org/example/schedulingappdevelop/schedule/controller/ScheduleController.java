@@ -3,7 +3,7 @@ package org.example.schedulingappdevelop.schedule.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.config.LoginRequiredException;
+import org.example.schedulingappdevelop.common.config.Exception.LoginRequiredException;
 import org.example.schedulingappdevelop.schedule.dto.*;
 import org.example.schedulingappdevelop.schedule.service.ScheduleService;
 import org.example.schedulingappdevelop.user.dto.SessionUser;
