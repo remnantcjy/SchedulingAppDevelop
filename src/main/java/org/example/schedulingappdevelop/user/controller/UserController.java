@@ -3,12 +3,11 @@ package org.example.schedulingappdevelop.user.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.config.SessionExpiredException;
+import org.example.schedulingappdevelop.config.LoginRequiredException;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -76,7 +75,7 @@ public class UserController {
         SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
 
         if (loginUser == null) {
-            throw new SessionExpiredException("회원정보를 수정하려면 로그인이 필요합니다.");
+            throw new LoginRequiredException("회원정보를 수정하려면 로그인이 필요합니다.");
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));

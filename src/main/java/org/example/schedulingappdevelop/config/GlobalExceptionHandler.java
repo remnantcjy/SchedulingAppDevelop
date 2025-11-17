@@ -11,7 +11,7 @@ public class GlobalExceptionHandler {
 
     // 커스텀 에러 핸들링
     @ExceptionHandler(ServerException.class)
-    public ResponseEntity<ErrorResponse> handlePasswordMismatchException(ServerException ex) {
+    public ResponseEntity<ErrorResponse> handleServerException(ServerException ex) {
         ErrorResponse response = new ErrorResponse(ex.getMessage());
         return ResponseEntity
                 .status(ex.getStatus())     // 커스텀 에러마다 동적인 에러 코드 설정 가능 !

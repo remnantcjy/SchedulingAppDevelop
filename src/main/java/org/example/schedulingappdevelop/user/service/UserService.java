@@ -1,6 +1,7 @@
 package org.example.schedulingappdevelop.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.schedulingappdevelop.config.PasswordEncoder;
 import org.example.schedulingappdevelop.config.PasswordMismatchException;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.entity.User;
@@ -17,13 +18,17 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 회원가입
     @Transactional
     public SignupUserResponse signup(SignupUserRequest request) {
 
+        // 비밀번호 암호화
+        String encodePassword = passwordEncoder.encode(request.getPassword());
+
         // 유저 객체 생성
-        User user = new User(request.getName(), request.getEmail(), request.getPassword());
+        User user = new User(request.getName(), request.getEmail(), encodePassword);
 
         // 유저 객체 저장소에 저장
         User savedUser = userRepository.save(user);
@@ -47,9 +52,11 @@ public class UserService {
                 () -> new IllegalStateException("없는 유저입니다.")
         );
 
+        // 암호화 된 비밀번호와 request.getPassword()가 일치하는지 확인
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         // 비밀번호 확인
-        if (!request.getPassword().equals(user.getPassword())) {
+        if (!passwordMatches) {
             throw new PasswordMismatchException("이메일 또는 비밀번호가 올바르지 않습니다.");
         } else {
             System.out.println("로그인 성공!");
@@ -106,9 +113,12 @@ public class UserService {
                 () -> new IllegalStateException("없는 유저입니다.")
         );
 
+        // 암호화 된 비밀번호와 request.getPassword()가 일치하는지 확인
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
+
         // user의 비밀번호 불일치 시 - 이름 수정 x
         // 비밀번호 불일치 예외 사용 !
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordMatches) {
             throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 회원정보를 수정할 수 없습니다.");
         }
 

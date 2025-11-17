@@ -3,8 +3,7 @@ package org.example.schedulingappdevelop.schedule.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.config.PasswordMismatchException;
-import org.example.schedulingappdevelop.config.SessionExpiredException;
+import org.example.schedulingappdevelop.config.LoginRequiredException;
 import org.example.schedulingappdevelop.schedule.dto.*;
 import org.example.schedulingappdevelop.schedule.service.ScheduleService;
 import org.example.schedulingappdevelop.user.dto.SessionUser;
@@ -24,8 +23,16 @@ public class ScheduleController {
     @PostMapping("/schedules/{userId}")
     public ResponseEntity<CreateScheduleResponse> createSchedule(
             @PathVariable Long userId,
-            @Valid @RequestBody CreateScheduleRequest request
+            @Valid @RequestBody CreateScheduleRequest request,
+            HttpSession session
     ) {
+        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
+
+        // 세션 만료 확인
+        if (loginUser == null) {
+            throw new LoginRequiredException("일정을 생성하기 위해 로그인이 필요합니다.");
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(userId, request));
     }
 
@@ -53,7 +60,7 @@ public class ScheduleController {
 
         // 세션 만료 확인
         if (loginUser == null) {
-            throw new SessionExpiredException("일정을 수정하기 위해 로그인이 필요합니다.");
+            throw new LoginRequiredException("일정을 수정하기 위해 로그인이 필요합니다.");
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(loginUser, scheduleId, request));
@@ -72,7 +79,7 @@ public class ScheduleController {
 
         // 세션 만료 확인
         if (loginUser == null) {
-            throw new SessionExpiredException("일정을 삭제하기 위해 로그인이 필요합니다.");
+            throw new LoginRequiredException("일정을 삭제하기 위해 로그인이 필요합니다.");
         }
 
         scheduleService.delete(scheduleId, request);

@@ -2,6 +2,7 @@ package org.example.schedulingappdevelop.schedule.service;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.example.schedulingappdevelop.config.PasswordEncoder;
 import org.example.schedulingappdevelop.config.PasswordMismatchException;
 import org.example.schedulingappdevelop.schedule.dto.*;
 import org.example.schedulingappdevelop.schedule.entity.Schedule;
@@ -22,6 +23,8 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
 
     // Lv1. 일정 생성 - Create
     @Transactional
@@ -123,8 +126,10 @@ public class ScheduleService {
                 () -> new IllegalStateException("없는 일정입니다.")
         );
 
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), loginUser.getPassword());
+
         // 세션, request의 비밀번호 일치하는지 조회
-        if (!loginUser.getPassword().equals(request.getPassword())) {
+        if (!passwordMatches) {
             throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 일정을 수정할 수 없습니다.");
         }
 
@@ -157,11 +162,13 @@ public class ScheduleService {
             // 해당 id의 일정이 있을 때
             // 비밀번호 확인
             Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                    () -> new IllegalStateException("ad")
+                    () -> new IllegalStateException("없는 일정입니다.")
             );
 
+            boolean passwordMatches = passwordEncoder.matches(request.getPassword(), schedule.getUser().getPassword());
+
             // 비밀번호 불일치 시
-            if (!schedule.getUser().getPassword().equals(request.getPassword())) {
+            if (!passwordMatches) {
                 throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 일정을 삭제할 수 없습니다.");
             }
 
