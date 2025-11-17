@@ -3,14 +3,13 @@ package org.example.schedulingappdevelop.comment.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import org.example.schedulingappdevelop.comment.dto.CommentResponse;
 import org.example.schedulingappdevelop.comment.dto.CreateCommentRequest;
+import org.example.schedulingappdevelop.comment.dto.DeleteCommentRequest;
 import org.example.schedulingappdevelop.comment.dto.UpdateCommentRequest;
 import org.example.schedulingappdevelop.comment.service.CommentService;
 import org.example.schedulingappdevelop.common.config.Exception.LoginRequiredException;
 import org.example.schedulingappdevelop.user.dto.SessionUser;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,5 +71,25 @@ public class CommentController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(commentService.update(loginUser, scheduleId, commentId, request));
+    }
+
+    // 댓글 삭제
+    @DeleteMapping("/schedules/{scheduleId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long scheduleId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody DeleteCommentRequest request,
+            HttpSession session
+    ) {
+        // 로그인 시 삭제 가능
+        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
+
+        if (loginUser == null) {
+            throw new LoginRequiredException("댓글을 삭제하기 위해 로그인이 필요합니다.");
+        }
+
+        commentService.delete(loginUser, request, scheduleId, commentId);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

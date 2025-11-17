@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.schedulingappdevelop.comment.dto.CommentResponse;
 import org.example.schedulingappdevelop.comment.dto.CreateCommentRequest;
+import org.example.schedulingappdevelop.comment.dto.DeleteCommentRequest;
 import org.example.schedulingappdevelop.comment.dto.UpdateCommentRequest;
 import org.example.schedulingappdevelop.comment.entity.Comment;
 import org.example.schedulingappdevelop.comment.repository.CommentRepository;
@@ -173,5 +174,37 @@ public class CommentService {
                 savedComment.getCreatedAt(),
                 savedComment.getModifiedAt()
         );
+    }
+
+
+    /**
+     * 댓글 삭제
+     * @param loginUser
+     * @param scheduleId
+     * @param commentId
+     */
+    @Transactional
+    public void delete(SessionUser loginUser, DeleteCommentRequest request, Long scheduleId, Long commentId) {
+
+        // 해당 일정이 있는지 확인
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new ScheduleNotFoundException("해당 일정이 없습니다.")
+        );
+
+        // 해당 댓글이 있는지 확인
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new IllegalStateException("해당 댓글이 없습니다.")
+        );
+
+        // 비밀번호 검증
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), schedule.getUser().getPassword());
+
+        // 비밀번호 불일치 시, 예외 처리
+        if (!passwordMatches) {
+            throw new PasswordMismatchException("비밀번호가 일치하지 않으므로 댓글을 삭제할 수 없습니다.");
+        }
+
+        // 댓글 삭제
+        commentRepository.deleteById(commentId);
     }
 }
