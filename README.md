@@ -1,4 +1,4 @@
-# CH3 일정 관리 앱 과제
+# CH3 일정 관리 앱 Develop 과제
 - **Spring 9기 Spring 심화 - CH3 일정 관리 앱 과제 (Develop 버전)**  
 스프링 부트를 기반으로 회원 + 일정 관리 + 댓글 기능을 제공하는 REST API 서버입니다.  
 3 Layer Architecture 기반으로 설계되었으며, JPA 단방향 연관관계를 활용하여 테이블 간 관계를 구현하고  
@@ -18,6 +18,15 @@ Cookie / Session을 통한 인증/인가 절차를 포함해 백엔드 애플리
 <br>
 
 ## ⚙️ 주요 기능
+👤 회원 (User)
+- 회원가입 (POST /api/signup)
+- 로그인 (POST /api/login)
+- 로그아웃 (POST /api/logout)
+- 전체 회원조회 (GET /api/users)
+- 단건 회원조회 (GET /api/users/{id})
+- 회원정보 수정 (PUT /api/users)
+- 회원탈퇴 (DELETE /api/users)
+
 🗓 일정 (Schedule)
 - 일정 생성 (POST /api/schedules)
 - 전체 일정 조회 (GET /api/schedules)
@@ -27,6 +36,10 @@ Cookie / Session을 통한 인증/인가 절차를 포함해 백엔드 애플리
 
 💬 댓글 (Comment)
 - 댓글 생성 (POST /api/schedules/{id}/comments)
+- 전체 댓글 조회 (GET /api/comments)
+- 단건 댓글 조회 (GET /api/schedules/{id}/comments)
+- 댓글 수정 (PUT /api/schedules/{id}/comments/{id})
+- 댓글 삭제 (DELETE /api/schedules/{id}/comments/{id})
 <br>
 
 ## 👩🏻‍💻 기술 스택
@@ -42,11 +55,12 @@ Cookie / Session을 통한 인증/인가 절차를 포함해 백엔드 애플리
 <br>
 
 ## 🗓 개발 기간
-- 2025.11.03 ~ 2025.11.06
+- 2025.11.07 ~ 2025.11.20
 <br>
 
 ## 🗂 ERD
 <img width="2020" height="492" alt="image" src="https://github.com/user-attachments/assets/c32dce98-15fe-4df2-a823-f41dbb2dcede" />
+<br>
 
 
 
