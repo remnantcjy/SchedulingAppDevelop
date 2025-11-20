@@ -1,10 +1,10 @@
 package org.example.schedulingappdevelop.schedule.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.common.config.Exception.ScheduleNotFoundException;
-import org.example.schedulingappdevelop.common.config.Exception.UserNotFoundException;
+import org.example.schedulingappdevelop.comment.entity.Comment;
+import org.example.schedulingappdevelop.comment.repository.CommentRepository;
+import org.example.schedulingappdevelop.common.config.Exception.*;
 import org.example.schedulingappdevelop.common.config.auth.PasswordEncoder;
-import org.example.schedulingappdevelop.common.config.Exception.PasswordMismatchException;
 import org.example.schedulingappdevelop.schedule.dto.*;
 import org.example.schedulingappdevelop.schedule.entity.Schedule;
 import org.example.schedulingappdevelop.schedule.repository.ScheduleRepository;
@@ -24,14 +24,15 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
     private final PasswordEncoder passwordEncoder;
 
 
     // Lv1. 일정 생성 - Create
     @Transactional
-    public CreateScheduleResponse save(Long userId, CreateScheduleRequest request) {
+    public CreateScheduleResponse save(SessionUser sessionUser, CreateScheduleRequest request) {
         // 해당 이름의 유저 있는지 확인 / 예외처리
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(sessionUser.getId()).orElseThrow(
                 () -> new UserNotFoundException("없는 유저입니다.")
         );
 
@@ -120,14 +121,19 @@ public class ScheduleService {
 
     // Lv 1. 일정 수정 - Update
     @Transactional
-    public UpdateScheduleResponse update(SessionUser loginUser, Long scheduleId, UpdateScheduleRequest request) {
+    public UpdateScheduleResponse update(SessionUser sessionUser, Long scheduleId, UpdateScheduleRequest request) {
 
         // 해당 id의 일정이 있는지 확인
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new ScheduleNotFoundException("없는 일정입니다.")
         );
 
-        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), loginUser.getPassword());
+        // 해당 user의 이메일과 request.email이 같은지 확인
+        if (!schedule.getUser().getEmail().equals(sessionUser.getEmail())) {
+            throw new OwnerMismatchException("당사자만 수정 가능합니다.");
+        }
+
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), sessionUser.getPassword());
 
         // 세션, request의 비밀번호 일치하는지 조회
         if (!passwordMatches) {
@@ -152,12 +158,17 @@ public class ScheduleService {
 
     // Lv 1. 일정 삭제 - Delete
     @Transactional
-    public void delete(Long scheduleId, DeleteScheduleRequest request) {
+    public void delete(SessionUser sessionUser, Long scheduleId, DeleteScheduleRequest request) {
 
         // 해당 id의 일정이 있는지 확인
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new ScheduleNotFoundException("없는 일정입니다.")
         );
+
+        // 해당 user의 이메일과 request.email이 같은지 확인
+        if (!schedule.getUser().getEmail().equals(sessionUser.getEmail())) {
+            throw new OwnerMismatchException("당사자만 수정 가능합니다.");
+        }
 
         // 비밀번호 확인
         boolean passwordMatches = passwordEncoder.matches(request.getPassword(), schedule.getUser().getPassword());
@@ -168,6 +179,15 @@ public class ScheduleService {
         }
 
         // 비밀번호 일치 시, 해당 일정 삭제
+
+        List<Comment> commentList = commentRepository.findByScheduleId(scheduleId);
+
+        // 만약, 댓글이 있다면 -> 예외 던지기
+        if (!commentList.isEmpty()) {
+            throw new CommentsExistException("댓글 먼저 삭제해주세요 ~");
+        }
+
+        // 일정 삭제
         scheduleRepository.deleteById(scheduleId);
     }
 }

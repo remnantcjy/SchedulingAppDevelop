@@ -20,20 +20,13 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     // Lv 1. 일정 생성 - Create
-    @PostMapping("/users/{userId}/schedules")
+    @PostMapping("/schedules")
     public ResponseEntity<CreateScheduleResponse> createSchedule(
-            @PathVariable Long userId,
             @Valid @RequestBody CreateScheduleRequest request,
-            HttpSession session
+            @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser
     ) {
-        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
 
-        // 세션 만료 확인
-        if (loginUser == null) {
-            throw new LoginRequiredException("일정을 생성하기 위해 로그인이 필요합니다.");
-        }
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(userId, request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(sessionUser, request));
     }
 
 
@@ -53,17 +46,10 @@ public class ScheduleController {
     public ResponseEntity<UpdateScheduleResponse> updateSchedule(
             @PathVariable Long scheduleId,
             @Valid @RequestBody UpdateScheduleRequest request,
-            HttpSession session
+            @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser
     ) {
 
-        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
-
-        // 세션 만료 확인
-        if (loginUser == null) {
-            throw new LoginRequiredException("일정을 수정하기 위해 로그인이 필요합니다.");
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(loginUser, scheduleId, request));
+        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(sessionUser, scheduleId, request));
     }
 
 
@@ -71,18 +57,11 @@ public class ScheduleController {
     @DeleteMapping("/schedules/{scheduleId}")
     public ResponseEntity<Void> deleteSchedule(
             @PathVariable Long scheduleId,
-            @RequestBody DeleteScheduleRequest request,
-            HttpSession session
+            @Valid @RequestBody DeleteScheduleRequest request,
+            @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser
     ) {
 
-        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
-
-        // 세션 만료 확인
-        if (loginUser == null) {
-            throw new LoginRequiredException("일정을 삭제하기 위해 로그인이 필요합니다.");
-        }
-
-        scheduleService.delete(scheduleId, request);
+        scheduleService.delete(sessionUser, scheduleId, request);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

@@ -27,16 +27,10 @@ public class CommentController {
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable Long scheduleId,
             @Valid @RequestBody CreateCommentRequest request,
-            HttpSession session
+            @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser
     ) {
-        // 1. 로그인 확인
-        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
 
-        if (loginUser == null) {
-            throw new LoginRequiredException("댓글을 작성하기 위해 로그인이 필요합니다.");
-        }
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(commentService.save(scheduleId, request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(commentService.save(sessionUser, scheduleId, request));
     }
 
     // 댓글 조회
@@ -61,16 +55,10 @@ public class CommentController {
             @PathVariable Long scheduleId,
             @PathVariable Long commentId,
             @Valid @RequestBody UpdateCommentRequest request,
-            HttpSession session
+            @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser
     ) {
-        // 로그인 시 수정 가능
-        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
 
-        if (loginUser == null) {
-            throw new LoginRequiredException("댓글을 수정하기 위해 로그인이 필요합니다.");
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.update(loginUser, scheduleId, commentId, request));
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.update(sessionUser, scheduleId, commentId, request));
     }
 
     // 댓글 삭제
@@ -79,16 +67,10 @@ public class CommentController {
             @PathVariable Long scheduleId,
             @PathVariable Long commentId,
             @Valid @RequestBody DeleteCommentRequest request,
-            HttpSession session
+            @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser
     ) {
-        // 로그인 시 삭제 가능
-        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
 
-        if (loginUser == null) {
-            throw new LoginRequiredException("댓글을 삭제하기 위해 로그인이 필요합니다.");
-        }
-
-        commentService.delete(loginUser, request, scheduleId, commentId);
+        commentService.delete(sessionUser, request, scheduleId, commentId);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

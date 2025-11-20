@@ -1,6 +1,7 @@
 package org.example.schedulingappdevelop.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.schedulingappdevelop.common.config.Exception.OwnerMismatchException;
 import org.example.schedulingappdevelop.common.config.Exception.UserNotFoundException;
 import org.example.schedulingappdevelop.common.config.auth.PasswordEncoder;
 import org.example.schedulingappdevelop.common.config.Exception.PasswordMismatchException;
@@ -112,11 +113,16 @@ public class UserService {
     }
 
     @Transactional
-    public UpdateUserResponse update(Long userId, UpdateUserRequest request) {
+    public UpdateUserResponse update(SessionUser sessionUser, UpdateUserRequest request) {
         // 해당 id의 유저가 있는지 확인 / 예외처리
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(sessionUser.getId()).orElseThrow(
                 () -> new UserNotFoundException("없는 유저입니다.")
         );
+
+        // 해당 user의 이메일과 sessionUser.email이 같은지 확인
+        if (!sessionUser.getEmail().equals(user.getEmail())) {
+            throw new OwnerMismatchException("당사자만 수정 가능합니다.");
+        }
 
         // 암호화 된 비밀번호와 request.getPassword()가 일치하는지 확인
         boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
@@ -141,12 +147,17 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(DeleteUserRequest request, Long userId) {
+    public void delete(SessionUser sessionUser, DeleteUserRequest request) {
 
         // 해당 id의 유저 있는지 확인
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(sessionUser.getId()).orElseThrow(
                 () -> new UserNotFoundException("없는 유저입니다.")
         );
+
+        // 사용자가 있을 때
+        if (!sessionUser.getEmail().equals(user.getEmail())) {
+            throw new OwnerMismatchException("당사자만 삭제 가능합니다.");
+        }
 
         // 유저 있을 때 -> 비밀번호 확인
         boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
@@ -157,14 +168,14 @@ public class UserService {
         }
 
         // 비밀번호 일치 시, 해당 유저 - 게시글이 있는지 확인
-        List<Schedule> scheduleList = scheduleRepository.findByUserId(userId);
+        List<Schedule> scheduleList = scheduleRepository.findByUserId(sessionUser.getId());
 
         // 게시글이 존재할 시, 예외 처리
         if (!scheduleList.isEmpty()) {
             throw new UserHasScheduleException("해당 유저가 작성한 게시글이 남아 있어 삭제할 수 없습니다. 게시글을 모두 삭제한 후 다시 시도해주세요.");
         } else {
             // 게시글이 없을 시, 해당 유저 삭제
-            userRepository.deleteById(userId);
+            userRepository.deleteById(sessionUser.getId());
         }
     }
 

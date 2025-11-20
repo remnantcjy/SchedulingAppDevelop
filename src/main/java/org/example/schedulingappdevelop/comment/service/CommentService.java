@@ -8,13 +8,13 @@ import org.example.schedulingappdevelop.comment.dto.DeleteCommentRequest;
 import org.example.schedulingappdevelop.comment.dto.UpdateCommentRequest;
 import org.example.schedulingappdevelop.comment.entity.Comment;
 import org.example.schedulingappdevelop.comment.repository.CommentRepository;
-import org.example.schedulingappdevelop.common.config.Exception.PasswordMismatchException;
-import org.example.schedulingappdevelop.common.config.Exception.ScheduleNotFoundException;
+import org.example.schedulingappdevelop.common.config.Exception.*;
 import org.example.schedulingappdevelop.common.config.auth.PasswordEncoder;
 import org.example.schedulingappdevelop.schedule.entity.Schedule;
 import org.example.schedulingappdevelop.schedule.repository.ScheduleRepository;
 import org.example.schedulingappdevelop.user.dto.SessionUser;
 import org.example.schedulingappdevelop.user.entity.User;
+import org.example.schedulingappdevelop.user.repository.UserRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,18 +27,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentService {
 
+    private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
     private final CommentRepository commentRepository;
     private final PasswordEncoder passwordEncoder;
 
     /**
      * 댓글 생성
+     * @param sessionUser
      * @param scheduleId
      * @param request
      * @return
      */
     @Transactional
-    public CommentResponse save(Long scheduleId, CreateCommentRequest request) {
+    public CommentResponse save(SessionUser sessionUser, Long scheduleId, CreateCommentRequest request) {
 
         // 해당 일정 id가 존재하는지 확인 / 예외처리
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
@@ -46,7 +48,9 @@ public class CommentService {
         );
 
         // 해당 일정의 User 반환
-        User user = schedule.getUser();
+        User user = userRepository.findById(sessionUser.getId()).orElseThrow(
+                () -> new UserNotFoundException("유저가 없습니다.")
+        );
 
         // 댓글 생성
         Comment comment = new Comment(request.getComment(), user, schedule);
@@ -55,11 +59,12 @@ public class CommentService {
 
         return new CommentResponse(
                 savedComment.getUser().getId(),
-                savedComment.getUser().getName(),
+                savedComment.getSchedule().getUser().getName(),
                 savedComment.getSchedule().getId(),
                 savedComment.getSchedule().getTitle(),
                 savedComment.getSchedule().getContents(),
                 savedComment.getId(),
+                savedComment.getUser().getName(),
                 savedComment.getComment(),
                 savedComment.getCreatedAt(),
                 savedComment.getModifiedAt()
@@ -83,11 +88,12 @@ public class CommentService {
         for (Comment comment : commentList) {
             CommentResponse dto = new CommentResponse(
                     comment.getUser().getId(),
-                    comment.getUser().getName(),
+                    comment.getSchedule().getUser().getName(),
                     comment.getSchedule().getId(),
                     comment.getSchedule().getTitle(),
                     comment.getSchedule().getContents(),
                     comment.getId(),
+                    comment.getUser().getName(),
                     comment.getComment(),
                     comment.getCreatedAt(),
                     comment.getModifiedAt()
@@ -114,11 +120,12 @@ public class CommentService {
         for (Comment comment : commentList) {
             CommentResponse dto = new CommentResponse(
                     comment.getUser().getId(),
-                    comment.getUser().getName(),
+                    comment.getSchedule().getUser().getName(),
                     comment.getSchedule().getId(),
                     comment.getSchedule().getTitle(),
                     comment.getSchedule().getContents(),
                     comment.getId(),
+                    comment.getUser().getName(),
                     comment.getComment(),
                     comment.getCreatedAt(),
                     comment.getModifiedAt()
@@ -131,13 +138,12 @@ public class CommentService {
 
     /**
      * 댓글 수정
-     * @param loginUser
      * @param scheduleId
      * @param commentId
      * @param request
      * @return
      */
-    public CommentResponse update(SessionUser loginUser, Long scheduleId, Long commentId, @Valid UpdateCommentRequest request) {
+    public CommentResponse update(SessionUser sessionUser, Long scheduleId, Long commentId, @Valid UpdateCommentRequest request) {
         // 해당 일정이 있는지 확인
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new ScheduleNotFoundException("해당 일정이 없습니다.")
@@ -145,11 +151,17 @@ public class CommentService {
 
         // 해당 댓글이 있는지 확인
         Comment comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new IllegalStateException("해당 댓글이 없습니다.")
+                () -> new CommentNotFoundException("해당 댓글이 없습니다.")
         );
 
+
+        // 해당 schedule의 이메일과 request.email이 같은지 확인
+        if (!sessionUser.getEmail().equals(comment.getUser().getEmail())) {
+            throw new OwnerMismatchException("당사자만 수정 가능합니다.");
+        }
+
         // 비밀번호 검증
-        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), schedule.getUser().getPassword());
+        boolean passwordMatches = passwordEncoder.matches(request.getPassword(), comment.getUser().getPassword());
 
         // 비밀번호 불일치 시, 예외 처리
         if (!passwordMatches) {
@@ -165,11 +177,12 @@ public class CommentService {
         // 반환
         return new CommentResponse(
                 savedComment.getUser().getId(),
-                savedComment.getUser().getName(),
+                savedComment.getSchedule().getUser().getName(),
                 savedComment.getSchedule().getId(),
                 savedComment.getSchedule().getTitle(),
                 savedComment.getSchedule().getContents(),
                 savedComment.getId(),
+                savedComment.getUser().getName(),
                 savedComment.getComment(),
                 savedComment.getCreatedAt(),
                 savedComment.getModifiedAt()
@@ -179,12 +192,12 @@ public class CommentService {
 
     /**
      * 댓글 삭제
-     * @param loginUser
+     * @param sessionUser
      * @param scheduleId
      * @param commentId
      */
     @Transactional
-    public void delete(SessionUser loginUser, DeleteCommentRequest request, Long scheduleId, Long commentId) {
+    public void delete(SessionUser sessionUser, DeleteCommentRequest request, Long scheduleId, Long commentId) {
 
         // 해당 일정이 있는지 확인
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
@@ -193,8 +206,13 @@ public class CommentService {
 
         // 해당 댓글이 있는지 확인
         Comment comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new IllegalStateException("해당 댓글이 없습니다.")
+                () -> new CommentNotFoundException("해당 댓글이 없습니다.")
         );
+
+        // 해당 schedule의 이메일과 request.email이 같은지 확인
+        if (!sessionUser.getEmail().equals(comment.getUser().getEmail())) {
+            throw new OwnerMismatchException("당사자만 삭제 가능합니다.");
+        }
 
         // 비밀번호 검증
         boolean passwordMatches = passwordEncoder.matches(request.getPassword(), schedule.getUser().getPassword());

@@ -3,7 +3,6 @@ package org.example.schedulingappdevelop.user.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.schedulingappdevelop.common.config.Exception.LoginRequiredException;
 import org.example.schedulingappdevelop.user.dto.*;
 import org.example.schedulingappdevelop.user.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -65,29 +64,27 @@ public class UserController {
     }
 
     // 유저 수정
-    @PutMapping("/users/{userId}")
+//    @PutMapping("/users/{userId}")
+    @PutMapping("/users")
     public ResponseEntity<UpdateUserResponse> update(
-            @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRequest request,
-            HttpSession session
+            @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser
     ) {
-
-        SessionUser loginUser = (SessionUser) session.getAttribute("loginUser");
-
-        if (loginUser == null) {
-            throw new LoginRequiredException("회원정보를 수정하려면 로그인이 필요합니다.");
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.update(sessionUser, request));
     }
 
     // 유저 삭제 - 회원 탈퇴
-    @DeleteMapping("/users/{userId}")
+    @DeleteMapping("/users")
     public ResponseEntity<Void> delete(
-            @PathVariable Long userId,
-            @RequestBody DeleteUserRequest request
+            @Valid @RequestBody DeleteUserRequest request,
+            @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser,
+            HttpSession session
     ) {
-        userService.delete(request, userId);
+        userService.delete(sessionUser, request);
+
+        // 회원 탈퇴 후, 세션 끊어줌
+        session.invalidate();
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
